@@ -4,7 +4,7 @@ extern crate time;
 //first two hex digits are opcode, next 6 are two 3 digit addresses
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095];
 const DPRINT: bool = true;
-const SYSTEM_OFFSET: u32 = 2;//index of where the program should start being mapped into ram
+pub const SYSTEM_OFFSET: u32 = 2;//index of where the program should start being mapped into ram
 
 macro_rules! dprintln {
     ($expression:expr) => (
@@ -25,9 +25,9 @@ pub unsafe fn initialize() {
 }
 
 pub unsafe fn copy_program(prog: Vec<u32>) {
-    let mut i = SYSTEM_OFFSET;
+    let mut i = 0;
     for n in prog {
-        RAM[i as usize] = n;
+        RAM[i+SYSTEM_OFFSET as usize] = n;
         i=i+1;
     }
 }
@@ -80,7 +80,16 @@ pub unsafe fn exec(space: u32) {
         RAM[arg2 as usize] = RAM[arg2 as usize] - RAM[arg1 as usize];
         dprintln!("{:X}, {}",RAM[arg2 as usize], RAM[arg2 as usize]);
     }
-    if opcode == 0x05 { //jmp
+    if opcode == 0x05 { //mov
+
+    }
+    if opcode == 0x06 { //jmp
         RAM[0] = arg1;
+    }
+}
+
+pub unsafe fn exec_vec(pro: Vec<u32>) {
+    for n in pro {
+        exec(n);
     }
 }

@@ -12,6 +12,11 @@ rest are two 12bit addresses. If an opcode only takes 1 argument then the last 1
 - `0x0000`: **EIP**, the address of the next instruction to be executed. Initialized to `SYSTEM_OFFSET`.
 - `0x0001`: **RET**, the return value of whatever was the last function run (`CMP`, etc). Init to `0xC001BABE`.
 - `0x0FFE`(4094): **EOF flag**, if this == 1 then program execution stops. The inst `EOF` sets this addr to 1.
+- `3095 and above`: Space reserved for constant values.
+
+# Tokens
+- `$`: Indicates a constant. The preprocessor automatically assigns the constant value to an address and replaces all references to the constant with the address.
+- `0x`: Indicates a hexadecimal number. frequently used with `$`.
 
 # Startup Process
 1. RAM is created, every address is initialized to `0xDEADBEEF`

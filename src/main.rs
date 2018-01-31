@@ -6,8 +6,9 @@ fn main() {
         vm::initialize();
         let test_program =
         vec![
-            "inc 16",
-            "add $16 16",
+            "sub 16 16",
+            "add $3735928559 16",
+            "sub $0xDEADBEEF 16",
             "eof"
         ];
         vm::copy_program(asm::assemble(test_program));
