@@ -87,8 +87,14 @@ pub unsafe fn translate(inst: &str) -> u32{
     if string_opcode == "sub" {
         out_inst = 0x04_000_000 | out_inst;
     }
-    if string_opcode == "jmp" {
+    if string_opcode == "mov" {
         out_inst = 0x05_000_000 | out_inst;
+    }
+    if string_opcode == "jmp" {
+        out_inst = 0x06_000_000 | out_inst;
+    }
+    if string_opcode == "cmp" {
+        out_inst = 0x07_000_000 | out_inst;
     }
 
     return out_inst;

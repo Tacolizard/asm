@@ -1,4 +1,5 @@
 extern crate time;
+use asm;
 
 //16bit memory space, 8bit opcode,  12 bit addresses
 //first two hex digits are opcode, next 6 are two 3 digit addresses
@@ -81,11 +82,26 @@ pub unsafe fn exec(space: u32) {
         dprintln!("{:X}, {}",RAM[arg2 as usize], RAM[arg2 as usize]);
     }
     if opcode == 0x05 { //mov
-
+        exec_str_vec(vec![
+                        &format!("sub {} {}",arg2, arg2),
+                        &format!("add {} {}",arg1, arg2)
+                        ]);
     }
     if opcode == 0x06 { //jmp
         RAM[0] = arg1;
     }
+    if opcode == 0x07 { //cmp
+        let r = RAM[arg2 as usize] - RAM[arg1 as usize];
+        exec_str(&format!("mov {} 1", r));
+    }
+}
+
+pub unsafe fn exec_str(s: &str) {
+    exec(asm::translate(s));
+}
+
+pub unsafe fn exec_str_vec(p: Vec<&str>) {
+    exec_vec(asm::assemble(p));
 }
 
 pub unsafe fn exec_vec(pro: Vec<u32>) {
