@@ -1,6 +1,14 @@
 use vm;
+use std::collections::HashMap;
 
-pub unsafe fn assemble(inst: &str) -> u32{
+pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {
+    let mut constants = HashMap::new();
+    for ln in prog {
+        
+    }
+}
+
+pub unsafe fn translate(inst: &str) -> u32{
     //this function is the lowest-level assembling function.
     //most other parts of assembly will be handled via preprocessing
     //the entire program. This will require some refactors however.
@@ -19,7 +27,7 @@ pub unsafe fn assemble(inst: &str) -> u32{
     if pieces.len() == 3 {
         string_arg2 = String::from(pieces[2]);
     }
-    if string_arg1.starts_with("$") { //constants
+    /*if string_arg1.starts_with("$") { //constants
         let mut i=0;    //currently constants with the same value will not use shared addresses.
         for n in vm::RAM.iter() { //in the future constants will be handled by preprocessing.
             if n == &0xDEADBEEF && i > 3000{
@@ -42,7 +50,7 @@ pub unsafe fn assemble(inst: &str) -> u32{
             i=i+1;
         }
         string_arg2 = i.to_string();
-    }
+    }*/
 
     //mask in first argument
     out_inst = (0x00_FFF_000 & (string_arg1.parse::<u32>().expect("Arg1 masking error.") << 12)) | out_inst;
