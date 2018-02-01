@@ -11,7 +11,7 @@ pub fn multiparse(top: &str) -> u32{
 
 pub unsafe fn bind_open(val: u32) -> u32 {
     let mut i=3095;//find an open address and assign a value to it
-    for l in i..4093 {
+    for _ in i..4093 {
         if vm::RAM[i] == 0xDEADBEEFu32 {
             vm::RAM[i as usize] = val;
             return i as u32;

@@ -5,7 +5,7 @@ use asm;
 //first two hex digits are opcode, next 6 are two 3 digit addresses
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095];
 const DPRINT: bool = true;
-pub const SYSTEM_ofFSET: u32 = 3;//index of where the program should start being mapped into ram
+pub const SYSTEM_OFFSET: u32 = 3;//index of where the program should start being mapped into ram
 
 macro_rules! dprintln {
     ($expression:expr) => (
@@ -21,7 +21,7 @@ macro_rules! dprintln {
 }
 
 pub unsafe fn initialize() {
-    RAM[0] = SYSTEM_ofFSET;
+    RAM[0] = SYSTEM_OFFSET;
     RAM[1] = 0xC001BABE;
     RAM[2] = 0x00000000;
 }
@@ -29,7 +29,7 @@ pub unsafe fn initialize() {
 pub unsafe fn copy_program(prog: Vec<u32>) {
     let mut i = 0;
     for n in prog {
-        RAM[i+SYSTEM_ofFSET as usize] = n;
+        RAM[i+SYSTEM_OFFSET as usize] = n;
         i=i+1;
     }
 }
@@ -68,7 +68,7 @@ pub unsafe fn exec(space: u32, silent: bool) {
     if opcode == 0x01 { //inc
         //RAM[arg1 as usize] = RAM[arg1 as usize] + 0x01;
         let r = RAM[arg1 as usize].checked_add(0x01);
-        let r = match r {
+        match r {
             Some(t) => {
                 RAM[1] = t;
                 RAM[arg1 as usize] = t;
@@ -87,7 +87,7 @@ pub unsafe fn exec(space: u32, silent: bool) {
     if opcode == 0x02 { //dec
         //RAM[arg1 as usize] = RAM[arg1 as usize] - 0x01;
         let r = RAM[arg1 as usize].checked_sub(0x01);
-        let r = match r {
+        match r {
             Some(t) => {
                 RAM[1] = t;
                 RAM[arg1 as usize] = t;
@@ -106,7 +106,7 @@ pub unsafe fn exec(space: u32, silent: bool) {
     if opcode == 0x03 { //add
         //RAM[arg1 as usize] = RAM[arg1 as usize] + RAM[arg2 as usize];
         let r = RAM[arg1 as usize].checked_add(RAM[arg2 as usize]);
-        let r = match r {
+        match r {
             Some(t) => {
                 RAM[1] = t;
                 RAM[arg1 as usize] = t;
@@ -125,7 +125,7 @@ pub unsafe fn exec(space: u32, silent: bool) {
     if opcode == 0x04 { //sub
         //RAM[arg1 as usize] = RAM[arg1 as usize] - RAM[arg2 as usize];
         let r = RAM[arg1 as usize].checked_sub(RAM[arg2 as usize]);
-        let r = match r {
+        match r {
             Some(t) => {
                 RAM[1] = t;
                 RAM[arg1 as usize] = t;
@@ -151,7 +151,7 @@ pub unsafe fn exec(space: u32, silent: bool) {
     }
     if opcode == 0x07 { //cmp
         let r = RAM[arg1 as usize].checked_sub(RAM[arg2 as usize]);
-        let r = match r {
+        match r {
             Some(t) => {
                 RAM[1] = t;
                 if t == 0 {
