@@ -29,7 +29,7 @@ pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {
     for ln in prog { //resolve constants
         let mut outln = String::from(ln);
         for piece in ln.split(" ") {
-            if piece.chars().next().unwrap() == '$' {
+            if piece.starts_with("$") {
                 if !constants.contains_key(piece) {
                     constants.insert(piece, bind_open(multiparse(piece.trim_left_matches("$"))));
                 }
