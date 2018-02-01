@@ -39,7 +39,6 @@ pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {
         prog_preprocessed.push(outln);
     }
     for ln in prog_preprocessed {
-        println!("{}", ln);
         prog_translated.push(translate(&ln));
     }
 
