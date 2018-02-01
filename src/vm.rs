@@ -5,7 +5,7 @@ use asm;
 //first two hex digits are opcode, next 6 are two 3 digit addresses
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095];
 const DPRINT: bool = true;
-pub const SYSTEM_OFFSET: u32 = 2;//index of where the program should start being mapped into ram
+pub const SYSTEM_ofFSET: u32 = 3;//index of where the program should start being mapped into ram
 
 macro_rules! dprintln {
     ($expression:expr) => (
@@ -21,23 +21,24 @@ macro_rules! dprintln {
 }
 
 pub unsafe fn initialize() {
-    RAM[0] = SYSTEM_OFFSET;
+    RAM[0] = SYSTEM_ofFSET;
     RAM[1] = 0xC001BABE;
+    RAM[2] = 0x00000000;
 }
 
 pub unsafe fn copy_program(prog: Vec<u32>) {
     let mut i = 0;
     for n in prog {
-        RAM[i+SYSTEM_OFFSET as usize] = n;
+        RAM[i+SYSTEM_ofFSET as usize] = n;
         i=i+1;
     }
 }
 
 pub unsafe fn step() {
-    let eip = RAM[0];
-    let cache_eip = eip;
-    exec(RAM[eip as usize], false);
-    if RAM[0] == cache_eip {RAM[0] = RAM[0] + 0x1};//if an instruction has modified the eip, don't overwrite the change
+    let ip = RAM[0];
+    let cache_ip = ip;
+    exec(RAM[ip as usize], false);
+    if RAM[0] == cache_ip {RAM[0] = RAM[0] + 0x1};//if an instruction has modified the ip, don't overwrite the change
 }
 
 pub unsafe fn run() {//0x0FFE
@@ -55,37 +56,168 @@ pub unsafe fn exec(space: u32, silent: bool) {
     let opcode = (space).rotate_left(8) as u8; //get the first two digits of space
     let arg1 = (0x00_FFF_000 & space) >> 12;
     let arg2 = 0x00_000_FFF & space;
-    if !silent { dprintln!("{}: OPCODE: {:X}\nARG1: {:X}, ARG2: {:X}\nBEFORE: {:X}", RAM[0], opcode, arg1, arg2, RAM[arg2 as usize]); }
+    if !silent { dprintln!("{}: OPCODE: {:X}\nARG1: {:X}, ARG2: {:X}\nBEFORE: {:X}", RAM[0], opcode, arg1, arg2, RAM[arg1 as usize]); }
+    let zf: u32 = (RAM[2] & (1u32<<0))>>0;
+    let of: u32 = (RAM[2] & (1u32<<4))>>4;
+    let sf: u32 = (RAM[2] & (1u32<<8))>>8;
+
 
     if opcode == 0xFF { //break execution
         RAM[4094] = 0x01;
     }
     if opcode == 0x01 { //inc
-        RAM[arg1 as usize] = RAM[arg1 as usize] + 0x01;
+        //RAM[arg1 as usize] = RAM[arg1 as usize] + 0x01;
+        let r = RAM[arg1 as usize].checked_add(0x01);
+        let r = match r {
+            Some(t) => {
+                RAM[1] = t;
+                RAM[arg1 as usize] = t;
+                if t == 0 {
+                    RAM[2] = 0x0_0_0_0_0_0_0_1;
+                }
+            },
+            None => {
+                dprintln!("Overflow.");
+                let mut flags = 0x0_0_0_0_0_0_0_1_0;
+                if RAM[arg1 as usize] < RAM[arg2 as usize] { flags = 0x0_0_0_0_0_0_1_0_0 | flags; }
+                RAM[2] = flags;
+            },
+        };
     }
     if opcode == 0x02 { //dec
-        RAM[arg1 as usize] = RAM[arg1 as usize] - 0x01;
+        //RAM[arg1 as usize] = RAM[arg1 as usize] - 0x01;
+        let r = RAM[arg1 as usize].checked_sub(0x01);
+        let r = match r {
+            Some(t) => {
+                RAM[1] = t;
+                RAM[arg1 as usize] = t;
+                if t == 0 {
+                    RAM[2] = 0x0_0_0_0_0_0_0_1;
+                }
+            },
+            None => {
+                dprintln!("Overflow.");
+                let mut flags = 0x0_0_0_0_0_0_0_1_0;
+                if RAM[arg1 as usize] < RAM[arg2 as usize] { flags = 0x0_0_0_0_0_0_1_0_0 | flags; }
+                RAM[2] = flags;
+            },
+        };
     }
     if opcode == 0x03 { //add
-        RAM[arg2 as usize] = RAM[arg2 as usize] + RAM[arg1 as usize];
+        //RAM[arg1 as usize] = RAM[arg1 as usize] + RAM[arg2 as usize];
+        let r = RAM[arg1 as usize].checked_add(RAM[arg2 as usize]);
+        let r = match r {
+            Some(t) => {
+                RAM[1] = t;
+                RAM[arg1 as usize] = t;
+                if t == 0 {
+                    RAM[2] = 0x0_0_0_0_0_0_0_1;
+                }
+            },
+            None => {
+                dprintln!("Overflow.");
+                let mut flags = 0x0_0_0_0_0_0_0_1_0;
+                if RAM[arg1 as usize] < RAM[arg2 as usize] { flags = 0x0_0_0_0_0_0_1_0_0 | flags; }
+                RAM[2] = flags;
+            },
+        };
     }
     if opcode == 0x04 { //sub
-        RAM[arg2 as usize] = RAM[arg2 as usize] - RAM[arg1 as usize];
+        //RAM[arg1 as usize] = RAM[arg1 as usize] - RAM[arg2 as usize];
+        let r = RAM[arg1 as usize].checked_sub(RAM[arg2 as usize]);
+        let r = match r {
+            Some(t) => {
+                RAM[1] = t;
+                RAM[arg1 as usize] = t;
+                if t == 0 {
+                    RAM[2] = 0x0_0_0_0_0_0_0_1;
+                }
+            },
+            None => {
+                dprintln!("Overflow.");
+                let mut flags = 0x0_0_0_0_0_0_0_1_0;
+                if RAM[arg1 as usize] < RAM[arg2 as usize] { flags = 0x0_0_0_0_0_0_1_0_0 | flags; }
+                RAM[2] = flags;
+            },
+        };
     }
     if opcode == 0x05 { //mov
-        exec_str_vec(vec![
-                        &format!("sub {} {}",arg2, arg2),
-                        &format!("add {} {}",arg1, arg2)
-                    ]);
+        RAM[arg1 as usize] = RAM[arg2 as usize];
+        //i've decided not to macro this because real CPUs can directly copy
+        //values from and into addresses.
     }
     if opcode == 0x06 { //jmp
         RAM[0] = arg1;
     }
     if opcode == 0x07 { //cmp
-        let r = RAM[arg2 as usize] - RAM[arg1 as usize];
-        exec_str(&format!("mov {} 1", r));
+        let r = RAM[arg1 as usize].checked_sub(RAM[arg2 as usize]);
+        let r = match r {
+            Some(t) => {
+                RAM[1] = t;
+                if t == 0 {
+                    RAM[2] = 0x0_0_0_0_0_0_0_1;
+                }
+            },
+            None => {
+                dprintln!("Overflow.");
+                let mut flags = 0x0_0_0_0_0_0_0_1_0;
+                if RAM[arg1 as usize] < RAM[arg2 as usize] { flags = 0x0_0_0_0_0_0_1_0_0 | flags; }
+                RAM[2] = flags;
+            },
+        };
     }
-    if !silent { dprintln!("AFTER: {:X}\n", RAM[arg2 as usize]); }
+    if opcode == 0x08 { //je
+        if zf == 1 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x09 { //jne
+        if zf == 0 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x0A { //ja
+        if of == zf && sf == 0 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x0B { //jae
+        if sf == 0 || zf == 1 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x0C { //jo, jump if overflow
+        if of == 1 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x0D { //jno
+        if of == 0 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x0F { //js, jump if signed
+        if sf == 1 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x10 { //jns
+        if sf == 0 {
+            RAM[0] = arg1;
+        }
+    }
+    if opcode == 0x11 { //and
+        RAM[arg1 as usize] = RAM[arg1 as usize] & RAM[arg2 as usize];
+    }
+    if opcode == 0x12 { //or
+        RAM[arg1 as usize] = RAM[arg1 as usize] | RAM[arg2 as usize];
+    }
+    if opcode == 0x13 { //xor
+        RAM[arg1 as usize] = RAM[arg1 as usize] ^ RAM[arg2 as usize];
+    }
+
+    if !silent { dprintln!("zf:{} of:{} sf:{}",(RAM[2] & (1u32<<0))>>0,(RAM[2] & (1u32<<4))>>4,(RAM[2] & (1u32<<8))>>8); }
+    if !silent { dprintln!("AFTER: {:X}\nRET: {:X}\n", RAM[arg1 as usize], RAM[1]); }
 }
 
 pub unsafe fn exec_str(s: &str) {//execute unassembled string

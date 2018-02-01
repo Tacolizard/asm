@@ -11,8 +11,8 @@ pub fn multiparse(top: &str) -> u32{
 
 pub unsafe fn bind_open(val: u32) -> u32 {
     let mut i=3095;//find an open address and assign a value to it
-    for l in vm::RAM.iter() {
-        if l == &0xDEADBEEFu32 {
+    for l in i..4093 {
+        if vm::RAM[i] == 0xDEADBEEFu32 {
             vm::RAM[i as usize] = val;
             return i as u32;
         }
@@ -22,9 +22,9 @@ pub unsafe fn bind_open(val: u32) -> u32 {
 }
 
 pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {
-    let mut constants = HashMap::new();
-    let mut prog_preprocessed = Vec::new();
-    let mut prog_translated = Vec::new();
+    let mut constants = HashMap::new(); //key: value pair of constants and the addresses assigned for them
+    let mut prog_preprocessed = Vec::new(); //a preprocessed str vec
+    let mut prog_translated = Vec::new(); //a u32 vec of the raw instructions
 
     for ln in prog { //resolve constants
         let mut outln = String::from(ln);
@@ -43,7 +43,6 @@ pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {
     }
 
     return prog_translated;
-
 }
 
 pub unsafe fn translate(inst: &str) -> u32{
@@ -94,6 +93,39 @@ pub unsafe fn translate(inst: &str) -> u32{
     }
     if string_opcode == "cmp" {
         out_inst = 0x07_000_000 | out_inst;
+    }
+    if string_opcode == "je" {
+        out_inst = 0x08_000_000 | out_inst;
+    }
+    if string_opcode == "jne" {
+        out_inst = 0x09_000_000 | out_inst;
+    }
+    if string_opcode == "ja" {
+        out_inst = 0x0A_000_000 | out_inst;
+    }
+    if string_opcode == "jae" {
+        out_inst = 0x0B_000_000 | out_inst;
+    }
+    if string_opcode == "jo" {
+        out_inst = 0x0C_000_000 | out_inst;
+    }
+    if string_opcode == "jno" {
+        out_inst = 0x0D_000_000 | out_inst;
+    }
+    if string_opcode == "js" {
+        out_inst = 0x0F_000_000 | out_inst;
+    }
+    if string_opcode == "jns" {
+        out_inst = 0x10_000_000 | out_inst;
+    }
+    if string_opcode == "and" {
+        out_inst = 0x11_000_000 | out_inst;
+    }
+    if string_opcode == "or" {
+        out_inst = 0x12_000_000 | out_inst;
+    }
+    if string_opcode == "xor" {
+        out_inst = 0x13_000_000 | out_inst;
     }
 
     return out_inst;
