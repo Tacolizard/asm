@@ -12,7 +12,7 @@ rest are two 12bit addresses. If an opcode only takes 1 argument then the last 1
 - `0x0000`: **EIP**, the address of the next instruction to be executed. Initialized to `SYSTEM_OFFSET`.
 - `0x0001`: **RET**, the return value of whatever was the last function run (`CMP`, etc). Init to `0xC001BABE`.
 - `0x0FFE`(4094): **EOF flag**, if this == 1 then program execution stops. The inst `EOF` sets this addr to 1.
-- `3095 and above`: Space reserved for constant values.
+- `3095-4093`: Space reserved for constant values.
 
 # Tokens
 - `$`: Indicates a constant. The preprocessor automatically assigns the constant value to an address and replaces all references to the constant with the address.
@@ -23,3 +23,11 @@ rest are two 12bit addresses. If an opcode only takes 1 argument then the last 1
 2. 'Magic addresses' such as EIP and RET are set to their default values. EIP is set to `SYSTEM_OFFSET`.
 3. Program is mapped into RAM starting from `SYSTEM_OFFSET`.
 4. Execution starts.
+
+# EFLAGS
+EFLAGS is a special address located at RAM[2] that is used to store bitflags for various things.
+The following list tells what each bit of EFLAGS is used for. **list is numbered from lowest bit to greatest**
+0. ZF (Zero Flag); Set when the result of an operation is zero.
+4. OF (Overflow Flag); Set when an operation overflows.
+8. SF (Sign Flag); Set when the result of an overflown operation **would be** negative.
+12. IF (Input Flag); Set by a program, causes execution to stop until a user enters a value into stdin.

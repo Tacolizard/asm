@@ -1,11 +1,13 @@
 extern crate time;
+extern crate hex;
+use std::io;
 use asm;
 
 //16bit memory space, 8bit opcode,  12 bit addresses
 //first two hex digits are opcode, next 6 are two 3 digit addresses
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095];
-const DPRINT: bool = true;
-pub const SYSTEM_OFFSET: u32 = 3;//index of where the program should start being mapped into ram
+const DPRINT: bool = false;
+pub const SYSTEM_OFFSET: u32 = 5;//index of where the program should start being mapped into ram
 
 macro_rules! dprintln {
     ($expression:expr) => (
@@ -21,9 +23,11 @@ macro_rules! dprintln {
 }
 
 pub unsafe fn initialize() {
-    RAM[0] = SYSTEM_OFFSET;
-    RAM[1] = 0xC001BABE;
-    RAM[2] = 0x00000000;
+    RAM[0] = SYSTEM_OFFSET; //ip
+    RAM[1] = 0xC001BABE; //ret
+    RAM[2] = 0x00000000; //EFLAGS
+    RAM[3] = 0x00000000; //stdout
+    RAM[4] = 0x00000000; //stdin
 }
 
 pub unsafe fn copy_program(prog: Vec<u32>) {
@@ -44,8 +48,22 @@ pub unsafe fn step() {
 pub unsafe fn run() {//0x0FFE
     while RAM[4094] != 1 {
         let start = time::precise_time_s();
+        let stdin = io::stdin();
+        let input = &mut String::new();
         step();
-        while time::precise_time_s() - start < 0.0001 {}
+        if (RAM[2] as u32 & (1u32<<12))>>12 == 1 {
+            input.clear();
+            stdin.read_line(input);
+            RAM[4] = u32::from_str_radix(&hex::encode(input.trim_matches('\n')), 16).unwrap();
+            RAM[2] = RAM[2] ^ 0x0_0_0_0_1_0_0_0;
+        }
+
+        if RAM[3] != 0 {
+            let tv: Vec<u8> = format!("{:X}", RAM[3]).into_bytes();
+            println!(" >> {}", String::from_utf8(hex::decode(tv).unwrap()).unwrap());
+            RAM[3] = 0;
+        }
+        while time::precise_time_s() - start < 1.0 {}
     }
 }
 

@@ -5,3 +5,4 @@ authors = ["taco"]
 
 [dependencies]
 time = "0.1.39"
+hex = "0.3.1"

@@ -3,6 +3,7 @@ use std::io::BufReader;
 use std::fs::File;
 use std::path::Path;
 use std::env;
+extern crate hex;
 mod vm;
 mod asm;
 

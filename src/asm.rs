@@ -1,9 +1,13 @@
+extern crate hex;
 use vm;
 use std::collections::HashMap;
 
 pub fn multiparse(top: &str) -> u32{
-    if top.starts_with("0x") {
+    if top.starts_with("0x") { //hex number
         return u32::from_str_radix(top.trim_left_matches("0x"), 16).expect("hex conversion err");
+    }
+    if top.starts_with("\'") { //string
+        return u32::from_str_radix(&hex::encode(top.trim_left_matches("\'").trim_right_matches("\'")), 16).unwrap();
     }
 
     return top.parse::<u32>().expect("Const err.");
