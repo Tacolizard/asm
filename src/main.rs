@@ -52,7 +52,7 @@ pub unsafe fn push_buffer(win: &mut Window, color: &mut u32) {
 fn main() {
     //let mut BUFFER: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
-    let mut window = Window::new("Test - ESC to exit",
+    let mut window = Window::new("Video Buffer Output - ESC to exit",
                                  WIDTH,
                                  HEIGHT,
                                  WindowOptions{
