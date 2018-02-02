@@ -14,7 +14,6 @@ use minifb::{Key, Scale, WindowOptions, Window};
 
 const WIDTH: usize = 210;
 const HEIGHT: usize = 210;
-//pub static mut BUFFER: Vec<u32> = vec![0; WIDTH * HEIGHT];
 pub static mut BUFFER: [u32; WIDTH*HEIGHT] = [0; WIDTH * HEIGHT];
 pub static mut CURPIX: u32 = 0;
 
@@ -43,15 +42,12 @@ pub unsafe fn push_buffer(win: &mut Window, color: &mut u32) {
         CURPIX = CURPIX + 1;
         if CURPIX as usize >= BUFFER.len() {
             CURPIX = 0;
-            //win.update_with_buffer(&BUFFER).unwrap();
         }
         *color = 0;
     }
 }
 
 fn main() {
-    //let mut BUFFER: Vec<u32> = vec![0; WIDTH * HEIGHT];
-
     let mut window = Window::new("Video Buffer Output - ESC to exit",
                                  WIDTH,
                                  HEIGHT,
