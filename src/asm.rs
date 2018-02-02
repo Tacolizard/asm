@@ -22,7 +22,7 @@ pub unsafe fn bind_open(val: u32) -> u32 {
         }
         i=i+1;
     }
-    return 4093;
+    panic!("Out of constant memory.");
 }
 
 pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {

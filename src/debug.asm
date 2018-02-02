@@ -1,18 +1,19 @@
-mov 3 $0xE29883
-mov 3 $'  '
-mov 3 $'Ente'
-mov 3 $'r '
-mov 3 $'numb'
-mov 3 $'er: '
-or 2 $0x00001000
-mov 300 4
-mov 3 $'   '
-mov 3 $'Ente'
-mov 3 $'r '
-mov 3 $'numb'
-mov 3 $'er: '
-or 2 $0x00001000
-mov 301 4
-add 301 300
-mov 3 301
+mov 300 $0
+mov 400 $0
+add 400 $1
+mov 5 $0xFFFFFFFF
+add 300 $1
+cmp 300 $70
+jne 9
+mov 300 $0
+mov 5 $0x79283e
+add 300 $1
+cmp 300 $70
+jne 14
+mov 300 $0
+mov 5 $0xFFFFFFFF
+add 300 $1
+cmp 300 $70
+jne 19
+jmp 6
 eof
