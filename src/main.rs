@@ -78,7 +78,7 @@ fn main() {
             push_buffer(&mut window, &mut vm::RAM[5]);
 
             if frame % 9999 == 0 {
-                let mut bg = BUFFER;
+                let mut bg = BUFFER; //swap buffers
                 BUFFER = gfx::update(BUFFER, frame);
                 window.update_with_buffer(&BUFFER).unwrap();
                 BUFFER = bg;

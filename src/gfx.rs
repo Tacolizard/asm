@@ -8,6 +8,8 @@ use minifb::{Key, Scale, WindowOptions, Window};
 
 pub static mut VRAM: [u32; 4096] = [0xDEADBEEF; 4096]; //ram for storing spritesheets
 //vram can hold 16 different 16x16 tiles with 32bit color
+//32bits for color is ridiculously large and very inefficient but it's convient
+//to use for right now.
 
 pub unsafe fn initialize() {
     let test_sprite = vec![
