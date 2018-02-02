@@ -2,13 +2,14 @@ extern crate time;
 extern crate hex;
 use std::io::{self, Write};
 use asm;
+use gfx;
 
 //32bit memory space, 8bit opcode,  12 bit addresses
 //~16.38kB (Kilobytes) memory total. About 16kB is usable as the rest is used to store
 //constants.
 //first two hex digits are opcode, next 6 are two 3 digit addresses
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095]; //ram for general computation and IO
-pub static mut VRAM: [u32; 4095] = [0xDEADBEEF; 4095]; //ram for storing spritesheets
+
 const DPRINT: bool = false;
 pub const SYSTEM_OFFSET: u32 = 6;//index of where the program should start being mapped into ram
 

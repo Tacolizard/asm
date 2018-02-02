@@ -6,7 +6,6 @@ use std::io::BufReader;
 use std::fs::File;
 use std::path::Path;
 use std::env;
-use std::time::Duration;
 mod vm;
 mod asm;
 mod gfx;
@@ -15,6 +14,10 @@ use minifb::{Key, Scale, WindowOptions, Window};
 
 const WIDTH: usize = 210;
 const HEIGHT: usize = 210;
+//pub static mut BUFFER: Vec<u32> = vec![0; WIDTH * HEIGHT];
+pub static mut BUFFER: [u32; WIDTH*HEIGHT] = [0; WIDTH * HEIGHT];
+pub static mut CURPIX: u32 = 0;
+
 //todo: implement macros at the assembler level
 //implement memory paging and virtual addresses
 //implement registers
@@ -32,8 +35,20 @@ where
         .collect()
 }
 
+pub unsafe fn push_buffer(win: &mut Window, color: &mut u32) {
+    if *color != 0 {
+        BUFFER[CURPIX as usize] = *color;
+        CURPIX = CURPIX + 1;
+        if CURPIX as usize >= BUFFER.len() {
+            CURPIX = 0;
+            win.update_with_buffer(&BUFFER).unwrap();
+        }
+        *color = 0;
+    }
+}
+
 fn main() {
-    let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
+    //let mut BUFFER: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
     let mut window = Window::new("Test - ESC to exit",
                                  WIDTH,
@@ -50,25 +65,26 @@ fn main() {
         if args.len() < 2 { panic!("Missing file argument"); }
         vm::initialize();
         vm::copy_program(asm::assemble(lines_from_file(&args[1]).iter().map(AsRef::as_ref).collect()));
+        gfx::initialize(&mut window);
     }
 
-    let mut curPix = 0;
     let mut frame = 0;
     unsafe{ while window.is_open() && !window.is_key_down(Key::Escape) && vm::RAM[4094] != 1{
 
             vm::run();
-            if vm::RAM[5] != 0 {
-                buffer[curPix] = vm::RAM[5];
-                curPix = curPix+1;
-                if curPix >= buffer.len() {
-                    window.update_with_buffer(&buffer).unwrap();
-                    curPix = 0;
+            /*if vm::RAM[5] != 0 {
+                BUFFER[CURPIX] = vm::RAM[5];
+                CURPIX = CURPIX+1;
+                if CURPIX >= BUFFER.len() {
+                    window.update_with_BUFFER(&BUFFER).unwrap();
+                    CURPIX = 0;
                 }
                 vm::RAM[5] = 0;
-            }
+            }*/
+            push_buffer(&mut window, &mut vm::RAM[5]);
 
-        // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
-        //window.update_with_buffer(&buffer).unwrap();
+        if frame % 99999 == 0 {window.update_with_buffer(&BUFFER).unwrap();} //periodically update even if nothing
+        //in BUFFER. This keeps the window responive.
         frame=frame+1;
     }
     }
