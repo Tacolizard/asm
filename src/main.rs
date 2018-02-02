@@ -41,7 +41,7 @@ pub unsafe fn push_buffer(win: &mut Window, color: &mut u32) {
         CURPIX = CURPIX + 1;
         if CURPIX as usize >= BUFFER.len() {
             CURPIX = 0;
-            win.update_with_buffer(&BUFFER).unwrap();
+            //win.update_with_buffer(&BUFFER).unwrap();
         }
         *color = 0;
     }
@@ -65,28 +65,26 @@ fn main() {
         if args.len() < 2 { panic!("Missing file argument"); }
         vm::initialize();
         vm::copy_program(asm::assemble(lines_from_file(&args[1]).iter().map(AsRef::as_ref).collect()));
-        gfx::initialize(&mut window);
+        gfx::initialize();
     }
 
     let mut frame = 0;
-    unsafe{ while window.is_open() && !window.is_key_down(Key::Escape) && vm::RAM[4094] != 1{
+    unsafe{
+        let mut bg = BUFFER;
+
+        while window.is_open() && !window.is_key_down(Key::Escape) && vm::RAM[4094] != 1{
 
             vm::run();
-            /*if vm::RAM[5] != 0 {
-                BUFFER[CURPIX] = vm::RAM[5];
-                CURPIX = CURPIX+1;
-                if CURPIX >= BUFFER.len() {
-                    window.update_with_BUFFER(&BUFFER).unwrap();
-                    CURPIX = 0;
-                }
-                vm::RAM[5] = 0;
-            }*/
             push_buffer(&mut window, &mut vm::RAM[5]);
 
-        if frame % 99999 == 0 {window.update_with_buffer(&BUFFER).unwrap();} //periodically update even if nothing
-        //in BUFFER. This keeps the window responive.
-        frame=frame+1;
-    }
+            if frame % 9999 == 0 {
+                bg = BUFFER;
+                BUFFER = gfx::update(BUFFER, frame);
+                window.update_with_buffer(&BUFFER).unwrap();
+                BUFFER = bg;
+            }
+            frame=frame+1;
+        }
     }
     println!();
 }

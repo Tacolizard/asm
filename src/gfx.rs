@@ -9,7 +9,7 @@ use minifb::{Key, Scale, WindowOptions, Window};
 pub static mut VRAM: [u32; 4096] = [0xDEADBEEF; 4096]; //ram for storing spritesheets
 //vram can hold 16 different 16x16 tiles with 32bit color
 
-pub unsafe fn initialize(win: &mut Window) {
+pub unsafe fn initialize() {
     let test_sprite = vec![
     0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00,
     0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00,
@@ -29,6 +29,32 @@ pub unsafe fn initialize(win: &mut Window) {
     0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00, 0xe5ff00
     ];
     copy_sprite(0, test_sprite);
+}
+
+pub unsafe fn update(buf: [u32; 44100], frc: u32) -> [u32; 44100] {
+    let mut obuf = buf;
+    let mut f = frc % 210;
+    if f >= 210 {f = 0;}
+    obuf = draw_sprite(0,f,1,obuf);
+    //obuf = draw_sprite(1,60,60,obuf);
+    return obuf;
+}
+
+pub fn coord_to_index(xi: u32, yi: u32, size: u32) -> usize {
+    return (yi * size + xi) as usize;
+    //this function will convert x and y coords to an index of a uniform grid
+}
+
+pub unsafe fn draw_sprite(index: usize, x: u32, y:u32, buffer: [u32; 44100]) -> [u32; 44100] {
+    let mut obuf: [u32; 44100] = buffer;
+    let sprin = coord_to_index(x, y, 210); //index of first point of sprite in buffer
+    for l in 0..15 {
+        for t in 0..15 {
+            obuf[sprin+coord_to_index(l, t, 210)] = VRAM[index+coord_to_index(l,t,16)];
+        }
+    }
+
+    return obuf;
 }
 
 pub unsafe fn copy_sprite(spritenum: u32, sprite: Vec<u32>) {
