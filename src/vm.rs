@@ -3,9 +3,12 @@ extern crate hex;
 use std::io::{self, Write};
 use asm;
 
-//16bit memory space, 8bit opcode,  12 bit addresses
+//32bit memory space, 8bit opcode,  12 bit addresses
+//~16.38kB (Kilobytes) memory total. About 16kB is usable as the rest is used to store
+//constants.
 //first two hex digits are opcode, next 6 are two 3 digit addresses
-pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095];
+pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095]; //ram for general computation and IO
+pub static mut VRAM: [u32; 4095] = [0xDEADBEEF; 4095]; //ram for storing spritesheets
 const DPRINT: bool = false;
 pub const SYSTEM_OFFSET: u32 = 6;//index of where the program should start being mapped into ram
 
@@ -28,7 +31,7 @@ pub unsafe fn initialize() {
     RAM[2] = 0x00000000; //EFLAGS
     RAM[3] = 0x00000000; //stdout
     RAM[4] = 0x00000000; //stdin
-    RAM[5] = 0xC001BABE; //gbuffer
+    RAM[5] = 0x00000000; //gbuffer
 }
 
 pub unsafe fn copy_program(prog: Vec<u32>) {
@@ -47,27 +50,22 @@ pub unsafe fn step() {
 }
 
 pub unsafe fn run() {//0x0FFE
-    while RAM[4094] != 1 {
-        let start = time::precise_time_s();
-        let stdin = io::stdin();
-        let mut stdout = io::stdout();
-        let input = &mut String::new();
-        step();
-        if (RAM[2] as u32 & (1u32<<12))>>12 == 1 {
-            stdin.read_line(input);
-            RAM[4] = u32::from_str_radix(&hex::encode(input.trim()), 16).unwrap();
-            RAM[2] = RAM[2] ^ 0x0_0_0_0_1_0_0_0;
-        }
-
-        if RAM[3] != 0 {
-            let tv: Vec<u8> = format!("{:01$X}", RAM[3], 2).into_bytes();
-            stdout.write(String::from_utf8_lossy(&hex::decode(tv).unwrap()).as_bytes());
-            stdout.flush();
-            RAM[3] = 0;
-        }
-        while time::precise_time_s() - start < 0.0001 {}
+    let stdin = io::stdin();
+    let mut stdout = io::stdout();
+    let input = &mut String::new();
+    step();
+    if (RAM[2] as u32 & (1u32<<12))>>12 == 1 {
+        stdin.read_line(input);
+        RAM[4] = u32::from_str_radix(&hex::encode(input.trim()), 16).unwrap();
+        RAM[2] = RAM[2] ^ 0x0_0_0_0_1_0_0_0;
     }
-    println!();
+
+    if RAM[3] != 0 {
+        let tv: Vec<u8> = format!("{:01$X}", RAM[3], 2).into_bytes();
+        stdout.write(String::from_utf8_lossy(&hex::decode(tv).unwrap()).as_bytes());
+        stdout.flush();
+        RAM[3] = 0;
+    }
 }
 
 pub unsafe fn exec(space: u32, silent: bool) {

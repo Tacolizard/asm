@@ -1,18 +1,20 @@
 extern crate hex;
 extern crate minifb;
+extern crate time;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
 use std::path::Path;
 use std::env;
+use std::time::Duration;
 mod vm;
 mod asm;
 mod gfx;
 
-use minifb::{Key, WindowOptions, Window};
+use minifb::{Key, Scale, WindowOptions, Window};
 
-const WIDTH: usize = 640;
-const HEIGHT: usize = 640;
+const WIDTH: usize = 210;
+const HEIGHT: usize = 210;
 //todo: implement macros at the assembler level
 //implement memory paging and virtual addresses
 //implement registers
@@ -36,7 +38,10 @@ fn main() {
     let mut window = Window::new("Test - ESC to exit",
                                  WIDTH,
                                  HEIGHT,
-                                 WindowOptions::default()).unwrap_or_else(|e| {
+                                 WindowOptions{
+                                     scale: Scale::X4,
+                                     ..WindowOptions::default()
+                                 }).unwrap_or_else(|e| {
         panic!("{}", e);
     });
 
@@ -47,17 +52,25 @@ fn main() {
         vm::copy_program(asm::assemble(lines_from_file(&args[1]).iter().map(AsRef::as_ref).collect()));
     }
 
-    while window.is_open() && !window.is_key_down(Key::Escape) {
-        for i in buffer.iter_mut() {
-            *i = 0; // write something more funny here!
-        }
+    let mut curPix = 0;
+    let mut frame = 0;
+    unsafe{ while window.is_open() && !window.is_key_down(Key::Escape) && vm::RAM[4094] != 1{
 
-        unsafe{
             vm::run();
-        }
-
+            if vm::RAM[5] != 0 {
+                buffer[curPix] = vm::RAM[5];
+                curPix = curPix+1;
+                if curPix >= buffer.len() {
+                    window.update_with_buffer(&buffer).unwrap();
+                    curPix = 0;
+                }
+                vm::RAM[5] = 0;
+            }
 
         // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
-        window.update_with_buffer(&buffer).unwrap();
+        //window.update_with_buffer(&buffer).unwrap();
+        frame=frame+1;
     }
+    }
+    println!();
 }
