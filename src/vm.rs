@@ -1,6 +1,7 @@
 extern crate time;
 extern crate hex;
 use std::io;
+use std::io::Write;
 use asm;
 
 //16bit memory space, 8bit opcode,  12 bit addresses
@@ -60,11 +61,13 @@ pub unsafe fn run() {//0x0FFE
 
         if RAM[3] != 0 {
             let tv: Vec<u8> = format!("{:X}", RAM[3]).into_bytes();
-            println!(" >> {}", String::from_utf8(hex::decode(tv).unwrap()).unwrap());
+            print!("{}", String::from_utf8_lossy(&hex::decode(tv).unwrap()));
+            io::stdout().flush();
             RAM[3] = 0;
         }
-        while time::precise_time_s() - start < 1.0 {}
+        while time::precise_time_s() - start < 0.0001 {}
     }
+    println!();
 }
 
 pub unsafe fn exec(space: u32, silent: bool) {
