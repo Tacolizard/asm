@@ -18,7 +18,9 @@ const HEIGHT: usize = 210;
 pub static mut BUFFER: [u32; WIDTH*HEIGHT] = [0; WIDTH * HEIGHT];
 pub static mut CURPIX: u32 = 0;
 
-//todo: implement macros at the assembler level
+//todo:
+//implement some way for a program to display and move sprites using gfx
+//implement macros at the assembler level
 //implement memory paging and virtual addresses
 //implement registers
 //implement stacks ESPECIALLY for strings
@@ -70,15 +72,13 @@ fn main() {
 
     let mut frame = 0;
     unsafe{
-        let mut bg = BUFFER;
-
         while window.is_open() && !window.is_key_down(Key::Escape) && vm::RAM[4094] != 1{
 
             vm::run();
             push_buffer(&mut window, &mut vm::RAM[5]);
 
             if frame % 9999 == 0 {
-                bg = BUFFER;
+                let mut bg = BUFFER;
                 BUFFER = gfx::update(BUFFER, frame);
                 window.update_with_buffer(&BUFFER).unwrap();
                 BUFFER = bg;
