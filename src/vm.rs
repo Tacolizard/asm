@@ -7,7 +7,7 @@ use asm;
 //first two hex digits are opcode, next 6 are two 3 digit addresses
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095];
 const DPRINT: bool = false;
-pub const SYSTEM_OFFSET: u32 = 5;//index of where the program should start being mapped into ram
+pub const SYSTEM_OFFSET: u32 = 6;//index of where the program should start being mapped into ram
 
 macro_rules! dprintln {
     ($expression:expr) => (
@@ -28,6 +28,7 @@ pub unsafe fn initialize() {
     RAM[2] = 0x00000000; //EFLAGS
     RAM[3] = 0x00000000; //stdout
     RAM[4] = 0x00000000; //stdin
+    RAM[5] = 0xC001BABE; //gbuffer
 }
 
 pub unsafe fn copy_program(prog: Vec<u32>) {
