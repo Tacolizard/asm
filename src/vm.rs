@@ -1,7 +1,6 @@
 extern crate time;
 extern crate hex;
-use std::io;
-use std::io::Write;
+use std::io::{self, Write};
 use asm;
 
 //16bit memory space, 8bit opcode,  12 bit addresses
@@ -50,19 +49,19 @@ pub unsafe fn run() {//0x0FFE
     while RAM[4094] != 1 {
         let start = time::precise_time_s();
         let stdin = io::stdin();
+        let mut stdout = io::stdout();
         let input = &mut String::new();
         step();
         if (RAM[2] as u32 & (1u32<<12))>>12 == 1 {
-            input.clear();
             stdin.read_line(input);
-            RAM[4] = u32::from_str_radix(&hex::encode(input.trim_matches('\n')), 16).unwrap();
+            RAM[4] = u32::from_str_radix(&hex::encode(input.trim()), 16).unwrap();
             RAM[2] = RAM[2] ^ 0x0_0_0_0_1_0_0_0;
         }
 
         if RAM[3] != 0 {
-            let tv: Vec<u8> = format!("{:X}", RAM[3]).into_bytes();
-            print!("{}", String::from_utf8_lossy(&hex::decode(tv).unwrap()));
-            io::stdout().flush();
+            let tv: Vec<u8> = format!("{:01$X}", RAM[3], 2).into_bytes();
+            stdout.write(String::from_utf8_lossy(&hex::decode(tv).unwrap()).as_bytes());
+            stdout.flush();
             RAM[3] = 0;
         }
         while time::precise_time_s() - start < 0.0001 {}
@@ -87,7 +86,6 @@ pub unsafe fn exec(space: u32, silent: bool) {
         RAM[4094] = 0x01;
     }
     if opcode == 0x01 { //inc
-        //RAM[arg1 as usize] = RAM[arg1 as usize] + 0x01;
         let r = RAM[arg1 as usize].checked_add(0x01);
         match r {
             Some(t) => {
@@ -106,7 +104,6 @@ pub unsafe fn exec(space: u32, silent: bool) {
         };
     }
     if opcode == 0x02 { //dec
-        //RAM[arg1 as usize] = RAM[arg1 as usize] - 0x01;
         let r = RAM[arg1 as usize].checked_sub(0x01);
         match r {
             Some(t) => {
@@ -125,7 +122,6 @@ pub unsafe fn exec(space: u32, silent: bool) {
         };
     }
     if opcode == 0x03 { //add
-        //RAM[arg1 as usize] = RAM[arg1 as usize] + RAM[arg2 as usize];
         let r = RAM[arg1 as usize].checked_add(RAM[arg2 as usize]);
         match r {
             Some(t) => {
@@ -144,7 +140,6 @@ pub unsafe fn exec(space: u32, silent: bool) {
         };
     }
     if opcode == 0x04 { //sub
-        //RAM[arg1 as usize] = RAM[arg1 as usize] - RAM[arg2 as usize];
         let r = RAM[arg1 as usize].checked_sub(RAM[arg2 as usize]);
         match r {
             Some(t) => {

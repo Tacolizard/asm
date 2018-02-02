@@ -7,7 +7,7 @@ pub fn multiparse(top: &str) -> u32{
         return u32::from_str_radix(top.trim_left_matches("0x"), 16).expect("hex conversion err");
     }
     if top.starts_with("\'") { //string
-        return u32::from_str_radix(&hex::encode(top.trim_left_matches("\'").trim_right_matches("\'")), 16).unwrap();
+        return u32::from_str_radix(&hex::encode(top.trim_left_matches('\'').trim_right_matches('\'')), 16).unwrap();
     }
 
     return top.parse::<u32>().expect("Const err.");
@@ -32,7 +32,7 @@ pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {
 
     for ln in prog { //resolve constants
         let mut outln = String::from(ln);
-        for piece in ln.split(" ") {
+        for piece in ln.splitn(3, ' ') {
             if piece.starts_with("$") {
                 if !constants.contains_key(piece) {
                     constants.insert(piece, bind_open(multiparse(piece.trim_left_matches("$"))));

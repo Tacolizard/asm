@@ -8,8 +8,10 @@ mod vm;
 mod asm;
 
 //todo: implement macros at the assembler level
-//implement memory paging and virtual addresses so i can have stacks and stuff
+//implement memory paging and virtual addresses
 //implement registers
+//implement stacks ESPECIALLY for strings
+//initialize constant addresses for every english unicode letter, and some symbols.
 
 fn lines_from_file<P>(filename: P) -> Vec<String>
 where
