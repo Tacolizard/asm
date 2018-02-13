@@ -35,12 +35,10 @@ pub unsafe fn initialize() {
 
 pub unsafe fn update(buf: [u32; 44100]) -> [u32; 44100] {
     let mut obuf = buf;
-    let spriteindex = (vm::RAM[6] >> 16) as usize;
-    let spritex = vm::RAM[6] >> 8;
+    let spriteindex = ((vm::RAM[6] & 0xFF000000)>>24) as usize;
+    let spritex = (vm::RAM[6] & 0x0000ff00)>>8;
     let spritey = vm::RAM[6] & 0x000000FF;
     obuf = draw_sprite(spriteindex,spritex,spritey,obuf);
-    //obuf = draw_sprite(0,vm::RAM[6],vm::RAM[6],obuf);
-    //obuf = draw_sprite(1,60,60,obuf);
     return obuf;
 }
 
@@ -54,7 +52,7 @@ pub unsafe fn draw_sprite(index: usize, x: u32, y:u32, buffer: [u32; 44100]) -> 
     let sprin = coord_to_index(x, y, 210); //index of first point of sprite in buffer
     for l in 0..15 {
         for t in 0..15 {
-            obuf[sprin+coord_to_index(l, t, 210)] = VRAM[index+coord_to_index(l,t,16)];
+            obuf[sprin+coord_to_index(l, t, 210)] = VRAM[(index*255)+coord_to_index(l,t,16)];
         }
     }
 

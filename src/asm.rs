@@ -30,8 +30,14 @@ pub unsafe fn assemble(prog: Vec<&str>) -> Vec<u32> {
     let mut prog_preprocessed = Vec::new(); //a preprocessed str vec
     let mut prog_translated = Vec::new(); //a u32 vec of the raw instructions
 
-    for ln in prog { //resolve constants
+    for mut ln in prog { //resolve constants
+        let mut cin = 0;
+        let mut cln = String::from(ln);
+        if cln.find(';') != None {
+            ln = ln.split_at(cln.find(';').unwrap()).0;
+        }
         let mut outln = String::from(ln);
+        println!("{}", outln);
         for piece in ln.splitn(3, ' ') {
             if piece.starts_with("$") {
                 if !constants.contains_key(piece) {
