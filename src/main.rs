@@ -24,6 +24,8 @@ pub static mut CURPIX: u32 = 0;
 //implement registers
 //implement stacks ESPECIALLY for strings
 //initialize constant addresses for every english unicode letter, and some symbols.
+//replace all checked operations in vm with overflowing operations
+//implement proper selection and manipulation of both x and y of a sprite.
 
 fn lines_from_file<P>(filename: P) -> Vec<String>
 where
@@ -36,7 +38,7 @@ where
         .collect()
 }
 
-pub unsafe fn push_buffer(win: &mut Window, color: &mut u32) {
+pub unsafe fn push_buffer(color: &mut u32) {
     if *color != 0 {
         BUFFER[CURPIX as usize] = *color;
         CURPIX = CURPIX + 1;
@@ -71,11 +73,11 @@ fn main() {
         while window.is_open() && !window.is_key_down(Key::Escape) && vm::RAM[4094] != 1{
 
             vm::run();
-            push_buffer(&mut window, &mut vm::RAM[5]);
+            push_buffer(&mut vm::RAM[5]);
 
-            if frame % 9999 == 0 {
-                let mut bg = BUFFER; //swap buffers
-                BUFFER = gfx::update(BUFFER, frame);
+            if frame % vm::RAM[7] == 0 {
+                let bg = BUFFER; //swap buffers
+                BUFFER = gfx::update(BUFFER);
                 window.update_with_buffer(&BUFFER).unwrap();
                 BUFFER = bg;
             }

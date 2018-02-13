@@ -33,11 +33,9 @@ pub unsafe fn initialize() {
     copy_sprite(0, test_sprite);
 }
 
-pub unsafe fn update(buf: [u32; 44100], frc: u32) -> [u32; 44100] {
+pub unsafe fn update(buf: [u32; 44100]) -> [u32; 44100] {
     let mut obuf = buf;
-    let mut f = frc % 210;
-    if f >= 210 {f = 0;}
-    obuf = draw_sprite(0,f,1,obuf);
+    obuf = draw_sprite(0,vm::RAM[6],vm::RAM[6],obuf);
     //obuf = draw_sprite(1,60,60,obuf);
     return obuf;
 }

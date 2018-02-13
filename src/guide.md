@@ -9,9 +9,14 @@ rest are two 12bit addresses. If an opcode only takes 1 argument then the last 1
 - `0xC001BABE`: Uninitialized, but **claimed** RAM, if this is set, programs and the VM will see this slot as used but not yet usable for checks and the like.
 
 # Memory Map
-- `0x0000`: **EIP**, the address of the next instruction to be executed. Initialized to `SYSTEM_OFFSET`.
-- `0x0001`: **RET**, the return value of whatever was the last function run (`CMP`, etc). Init to `0xC001BABE`.
-- `0x0FFE`(4094): **EOF flag**, if this == 1 then program execution stops. The inst `EOF` sets this addr to 1.
+- `0`: **EIP**, the address of the next instruction to be executed. Initialized to `SYSTEM_OFFSET`.
+- `1`: **RET**, the return value of whatever was the last function run (`CMP`, etc). Init to `0xC001BABE`.
+- `2`: **EFLAGS**, see EFLAGS section for more info.
+- `3`: **STDOUT**, standard output, writes the utf8 char corresponding whatever code it contains to to the terminal or any stdout.
+- `4`: **STDIN**, character code(s) of whatever chars have been entered into stdin.
+- `5`: **gbuffer**, a single color code that it rendered progressively to the screen. mainly used for debug. but can be used for quickly software rendering a background (kinda janky right now)
+- `6 - 7`: debug things for using the GFX renderer that will be changed.
+- `0x0FFE`(4094): **EOF flag**, if this == 1 then program execution stops. The inst `EOF` sets this addr to 1
 - `3095-4093`: Space reserved for constant values.
 
 # Tokens

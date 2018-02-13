@@ -11,7 +11,7 @@ use gfx;
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095]; //ram for general computation and IO
 
 const DPRINT: bool = false;
-pub const SYSTEM_OFFSET: u32 = 6;//index of where the program should start being mapped into ram
+pub const SYSTEM_OFFSET: u32 = 8;//index of where the program should start being mapped into ram
 
 macro_rules! dprintln {
     ($expression:expr) => (
@@ -33,6 +33,8 @@ pub unsafe fn initialize() {
     RAM[3] = 0x00000000; //stdout
     RAM[4] = 0x00000000; //stdin
     RAM[5] = 0x00000000; //gbuffer
+    RAM[6] = 0x00000000; //spritepos
+    RAM[7] = 0x00000001; //renderint
 }
 
 pub unsafe fn copy_program(prog: Vec<u32>) {
