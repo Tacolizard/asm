@@ -2,7 +2,6 @@ extern crate time;
 extern crate hex;
 use std::io::{self, Write};
 use asm;
-use gfx;
 
 //32bit memory space, 8bit opcode,  12 bit addresses
 //~16.38kB (Kilobytes) memory total. About 16kB is usable as the rest is used to store
@@ -33,7 +32,7 @@ pub unsafe fn initialize() {
     RAM[3] = 0x00000000; //stdout
     RAM[4] = 0x00000000; //stdin
     RAM[5] = 0x00000000; //gbuffer
-    RAM[6] = 0x00000000; //spritepos
+    RAM[6] = 0x00_00_00_00; //spriteflags
     RAM[7] = 0x00000001; //renderint
 }
 
@@ -232,6 +231,12 @@ pub unsafe fn exec(space: u32, silent: bool) {
     }
     if opcode == 0x13 { //xor
         RAM[arg1 as usize] = RAM[arg1 as usize] ^ RAM[arg2 as usize];
+    }
+    if opcode == 0x14 { //shl
+        RAM[arg1 as usize] = RAM[arg1 as usize] << RAM[arg2 as usize];
+    }
+    if opcode == 0x15 { //shr
+        RAM[arg1 as usize] = RAM[arg1 as usize] >> RAM[arg2 as usize];
     }
 
     if !silent { dprintln!("zf:{} of:{} sf:{}",(RAM[2] & (1u32<<0))>>0,(RAM[2] & (1u32<<4))>>4,(RAM[2] & (1u32<<8))>>8); }

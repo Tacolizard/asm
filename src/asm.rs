@@ -131,6 +131,12 @@ pub unsafe fn translate(inst: &str) -> u32{
     if string_opcode == "xor" {
         out_inst = 0x13_000_000 | out_inst;
     }
+    if string_opcode == "shl" {
+        out_inst = 0x14_000_000 | out_inst;
+    }
+    if string_opcode == "shr" {
+        out_inst = 0x15_000_000 | out_inst;
+    }
 
     return out_inst;
 }
