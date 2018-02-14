@@ -33,7 +33,7 @@ pub unsafe fn initialize() {
     RAM[4] = 0x00000000; //stdin
     RAM[5] = 0x00000000; //gbuffer
     RAM[6] = 0x00_00_00_00; //spriteflags
-    RAM[7] = 0x00000001; //renderint
+    RAM[7] = 0x00000000; //renderint
 }
 
 pub unsafe fn copy_program(prog: Vec<u32>) {

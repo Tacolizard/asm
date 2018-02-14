@@ -35,9 +35,9 @@ pub unsafe fn initialize() {
 
 pub unsafe fn update(buf: [u32; 44100]) -> [u32; 44100] {
     let mut obuf = buf;
-    let spriteindex = ((vm::RAM[6] & 0xFF000000)>>24) as usize;
-    let spritex = (vm::RAM[6] & 0x0000ff00)>>8;
-    let spritey = vm::RAM[6] & 0x000000FF;
+    let spriteindex = ((vm::RAM[6] & 0xF0000000)>>26) as usize;//which sprite to draw
+    let spritex = (vm::RAM[6] & 0x0000FF00)>>8;//x position of sprite
+    let spritey = vm::RAM[6] & 0x000000FF;//y pos of sprite
     obuf = draw_sprite(spriteindex,spritex,spritey,obuf);
     return obuf;
 }

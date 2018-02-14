@@ -15,7 +15,7 @@ rest are two 12bit addresses. If an opcode only takes 1 argument then the last 1
 - `3`: **STDOUT**, standard output, writes the utf8 char corresponding whatever code it contains to to the terminal or any stdout.
 - `4`: **STDIN**, character code(s) of whatever chars have been entered into stdin.
 - `5`: **gbuffer**, a single color code that it rendered progressively to the screen. mainly used for debug. but can be used for quickly software rendering a background (kinda janky right now)
-- `6 - 7`: debug things for using the GFX renderer that will be changed.
+- `6`: **spriteflags**, bitflags for which sprite is currently selected and the x and y coord to draw the sprite at.
 - `0x0FFE`(4094): **EOF flag**, if this == 1 then program execution stops. The inst `EOF` sets this addr to 1
 - `3095-4093`: Space reserved for constant values.
 
