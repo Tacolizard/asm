@@ -1,1 +1,1 @@
-asm
+The purpose of this project is to understand more about how CPUs work, the limitations of assembly, and how much I don't know I don't know about some of the lowest levels of computing. I figured that the best way to learn all of this was to create my own CPU, subject myself to a lot of the same limitations that real CPUs have, and see what kind of tricks that forces me to use.
