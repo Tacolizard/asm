@@ -3,7 +3,7 @@ extern crate hex;
 use std::io::{self, Write};
 use asm;
 
-//16bit memory space, 8bit opcode,  12 bit addresses
+//32bit memory space, 8bit opcode,  12 bit addresses
 //first two hex digits are opcode, next 6 are two 3 digit addresses
 pub static mut RAM: [u32; 4095] = [0xDEADBEEF; 4095];
 const DPRINT: bool = false;
@@ -151,9 +151,7 @@ pub unsafe fn exec(space: u32, silent: bool) {
             },
             None => {
                 dprintln!("Overflow.");
-                let mut flags = 0x0_0_0_0_0_0_0_1_0;
-                if RAM[arg1 as usize] < RAM[arg2 as usize] { flags = 0x0_0_0_0_0_0_1_0_0 | flags; }
-                RAM[2] = flags;
+                set_sf(arg1 as usize, arg2 as usize);
             },
         };
     }
@@ -248,4 +246,10 @@ pub unsafe fn exec_vec(pro: Vec<u32>) {//execute an assembled vec
     for n in pro {
         exec(n, true);
     }
+}
+
+pub unsafe fn set_sf(a1: usize, a2: usize) {
+    let mut flags = 0x0_0_0_0_0_0_0_1_0;
+    if RAM[a1] < RAM[a2] { flags = 0x0_0_0_0_0_0_1_0_0 | flags; }
+    RAM[2] = flags;
 }
