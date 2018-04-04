@@ -66,9 +66,9 @@ pub unsafe fn run() {//0x0FFE
         }
         while time::precise_time_s() - start < 0.0001 {}
     }
-    println!();
+    println!(); //just create a new line for spacing
 }
-
+//ugly code inbound
 pub unsafe fn exec(space: u32, silent: bool) {
     //at this level there are no numerical constants, the assembler will
     //assign the constant value to some open address and all references to the
